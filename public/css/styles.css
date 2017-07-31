@@ -16,7 +16,19 @@ body {
 .resultado {
     width: 300px;
     margin: 0 auto;
-    background: yellow;
+    background: silver;
     text-align: center;
     padding: 15px;
+    float: left;
+}
+
+.projecao {
+    float: right;
+    background: lightgrey;
+}
+
+li,
+a {
+    display: inline;
+    text-decoration: none;
 }

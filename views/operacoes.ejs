@@ -1,9 +1,38 @@
 <% include header %>
     <h2>Operacoes</h2>
-    <%operacoes.forEach((operacao) => { %>
+    <p>Filtrar por:
+        <a href="/operacoes">Todos</a> |
+        <a href="/operacoes?tipo=entradas">Entradas</a> |
+        <a href="/operacoes?tipo=saidas">Saídas</a>
+    </p>
+    <p>
+        Selecione o mês que deseja visualizar:
+        <ul>
+            <li><a href="/operacoes?mes=janeiro">Janeiro</a></li>
+            <li><a href="/operacoes?mes=fevereiro">Fevereiro</a></li>
+            <li><a href="/operacoes?mes=marco">Março</a></li>
+            <li><a href="/operacoes?mes=abril">Abril</a></li>
+            <li><a href="/operacoes?mes=maio">Maio</a></li>
+            <li><a href="/operacoes?mes=junho">Junho</a></li>
+            <li><a href="/operacoes?mes=julho">Julho</a></li>
+            <li><a href="/operacoes?mes=agosto">Agosto</a></li>
+            <li><a href="/operacoes?mes=setembro">Setembro</a></li>
+            <li><a href="/operacoes?mes=outubro">Outubro</a></li>
+            <li><a href="/operacoes?mes=novembro">Novembro</a></li>
+            <li><a href="/operacoes?mes=dezembro">Dezembro</a></li>
+        </ul>
+
+    </p>
+    <br>
+    <% operacoes.forEach((operacao) => { %>
         <p>
-            <%= operacao.descricao %> R$
-                <%= operacao.valor %>
+            <%=operacao.descricao %> R$
+                <%=operacao.valor %> - Sub-total: R$
+                    <%= operacao.sub %>
+                        - Vencimento no dia:
+                        <%= operacao.diaVencimento %>
+                            - <a href="/operacoes/delete/<%= operacao._id %>">Excluir</a> - <a href="/operacoes/edit/<%= operacao._id %>">Editar</a>
         </p>
         <% }) %>
-            <% include footer%>
+
+            <% include footer %>

@@ -7,7 +7,7 @@
         <button type="submit">Calcular</button>
     </form>
 
-    <% if(resultado.calculado){%>
+    <% if(resultado.calculado) { %>
         <div class="resultado">
             <h2>Resultado</h2>
             <p>
@@ -15,6 +15,27 @@
                 <%= resultado.total.toFixed(2) %>
             </p>
         </div>
+        <div class="projecao">
+            <h3>Projeção Mês a Mês</h3>
+            <table>
+                <tr>
+                    <th>Mês</th>
+                    <th>Valor</th>
+                </tr>
+                <% resultado.projecao.forEach((valor) => { %>
+                    <tr>
+                        <td>
+                            <%= valor.mes %>
+                        </td>
+                        <td>
+                            R$
+                            <%= valor.juros.toFixed(2) %>
+                        </td>
+                    </tr>
+                    <%  }) %>
+            </table>
+        </div>
+
         <% } %>
 
             <% include footer %>

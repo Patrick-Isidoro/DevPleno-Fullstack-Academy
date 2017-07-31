@@ -22,6 +22,14 @@ app.get('/', (req, res) => {
 })
 
 const calculoJuros = (p, i, n) => p * Math.pow(1 + i, n)
+const evolucao = (p, i, n) => Array
+    .from(new Array(n), (n, i) => i + 1)
+    .map(mes => {
+        return {
+            mes,
+            juros: calculoJuros(p, i, mes)
+        }
+    })
 
 app.get('/calculadora', (req, res) => {
     const resultado = {
@@ -34,13 +42,18 @@ app.get('/calculadora', (req, res) => {
             parseFloat(req.query.taxa) / 100,
             parseInt(req.query.tempo)
         )
+        resultado.evolucao = evolucao(
+            parseFloat(req.query.valorInicial),
+            parseFloat(req.query.taxa) / 100,
+            parseInt(req.query.tempo)
+        )
     }
     res.render('calculadora', { resultado })
 })
 
-const findAll = (db, collectionName) => {
+const find = (db, collectionName, conditions) => {
     const collection = db.collection(collectionName)
-    const cursor = collection.find({})
+    const cursor = collection.find(conditions)
     const documents = []
 
     return new Promise((resolve, reject) => {
@@ -64,26 +77,114 @@ const insert = (db, collectionName, document) => {
     })
 }
 
+const ObjectID = require('mongodb').ObjectID
+const remove = (db, collectionName, id) => {
+    const operacoes = db.collection(collectionName)
+    new Promise((resolve, reject) => {
+        operacoes.deleteOne({ _id: new ObjectID(id) }, (err, result) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
+
+const update = (db, collectionName, id, values) => {
+    const collection = db.collection(collectionName)
+    return new Promise((resolve, reject) => {
+        collection.updateOne({ _id: new ObjectID(id) }, // condicao
+            { $set: values }, // quais valores novos
+            (err, result) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(result)
+                }
+            })
+    })
+}
+
+const subtotal = operacoes => {
+    let sub = 0
+    return operacoes.map(operacao => {
+        sub += operacao.valor
+        let newOperacao = {
+            _id: operacao._id,
+            valor: operacao.valor,
+            descricao: operacao.descricao,
+            diaVencimento: operacao.diaVencimento,
+            sub: sub
+        }
+        return newOperacao
+    })
+}
+
+app.get('/operacoes/delete/:id', async(req, res) => {
+    await remove(app.db, 'operacoes', req.params.id)
+    res.redirect('/operacoes')
+})
+
+app.get('/operacoes/edit/:id', async(req, res) => {
+    const conditions = {
+        _id: new ObjectID(req.params.id)
+    }
+    const operacoes = await find(app.db, 'operacoes', conditions)
+    if (operacoes.length === 0) {
+        res.redirect('/operacoes')
+    } else {
+        res.render('edit-operacao', { operacao: operacoes[0] })
+    }
+})
+
+app.post('/operacoes/edit/:id', async(req, res) => {
+    const conditions = {
+        _id: new ObjectID(req.params.id)
+    }
+    const operacoes = await find(app.db, 'operacoes', conditions)
+    if (operacoes.length === 0) {
+        res.redirect('/operacoes')
+    } else {
+        await update(app.db, 'operacoes', req.params.id, req.body)
+        res.redirect('/operacoes')
+    }
+})
 
 app.get('/operacoes', async(req, res) => {
-    const operacoes = await findAll(app.db, 'operacoes')
-    res.render('operacoes', { operacoes })
+    let conditions = {}
+    if (req.query.tipo && req.query.tipo === 'entradas') {
+        conditions = {
+            valor: { $gte: 0 } // greater then equal
+        }
+    } else if (req.query.tipo && req.query.tipo === 'saidas') {
+        conditions = {
+            valor: { $lt: 0 } // less then
+        }
+    }
+    const operacoes = await find(app.db, 'operacoes', conditions)
+    const newOperacoes = subtotal(operacoes)
+    res.render('operacoes', { operacoes: newOperacoes })
 })
 
 // mostrar formulario
 app.get('/nova-operacao', (req, res) => res.render('nova-operacao'))
 app.post('/nova-operacao', async(req, res) => {
+
     const operacao = {
         descricao: req.body.descricao,
-        valor: parseFloat(req.body.valor)
+        valor: parseFloat(req.body.valor),
+        diaVencimento: parseInt(req.body.diaVencimento)
     }
+
     const newOperacao = await insert(app.db, 'operacoes', operacao)
     res.redirect('/operacoes')
+
 })
 
 MongoClient.connect(mongoUri, (err, db) => {
     if (err) {
-        console.log('error')
+        return
     } else {
         app.db = db
         app.listen(port, () => console.log('Server running...'))
