@@ -3,14 +3,20 @@ body {
     font-family: sans-serif;
 }
 
-.header {
-    background: grey;
+.topo {
+    background: lightgrey;
     padding: 20px;
     text-align: center;
 }
 
 .content {
-    background: #efefef
+    background: #efefef;
+    margin: 0 auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .resultado {
@@ -31,4 +37,30 @@ li,
 a {
     display: inline;
     text-decoration: none;
+}
+
+button {
+    background-color: green;
+    border: none;
+    color: white;
+    padding: 10px;
+    text-decoration: none;
+    text-align: center;
+    margin: 4px 2px;
+    cursor: pointer;
+    width: 90px;
+}
+
+form button {
+    margin-left: auto;
+    margin-top: 20px;
+    display: block;
+}
+
+form input {
+    margin-top: 5px;
+}
+
+form {
+    width: 350px;
 }

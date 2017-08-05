@@ -1,0 +1,24 @@
+<% include header %>
+    <table>
+        <tr>
+            <th>Descrição</th>
+            <th>Valor</th>
+            <th>Dia de Vencimento</th>
+        </tr>
+        <% contas.forEach((conta) => {  %>
+            <tr>
+                <td>
+                    <%= conta.descricao %>
+                </td>
+                <td> R$
+                    <%= conta.valorEstimado.toFixed(2) %>
+                </td>
+                <td>
+                    <%= conta.diaVencimento %>
+                </td>
+            </tr>
+    </table>
+
+    <% }) %>
+
+        <% include footer %>

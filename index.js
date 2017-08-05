@@ -114,7 +114,6 @@ const subtotal = operacoes => {
             _id: operacao._id,
             valor: operacao.valor,
             descricao: operacao.descricao,
-            diaVencimento: operacao.diaVencimento,
             sub: sub
         }
         return newOperacao
@@ -180,6 +179,44 @@ app.post('/nova-operacao', async(req, res) => {
     const newOperacao = await insert(app.db, 'operacoes', operacao)
     res.redirect('/operacoes')
 
+})
+const mensais = operacoes => {
+    let sub = 0
+    return operacoes.map(operacao => {
+        sub += operacao.valor
+        let newConta = {
+            _id: operacao._id,
+            valor: operacao.valor,
+            descricao: operacao.descricao,
+            diaVencimento: operacao.diaVencimento,
+            sub: sub
+        }
+        return newConta
+    })
+}
+
+app.get('/operacoes/delete/:id', async(req, res) => {
+    await remove(app.db, 'contas', req.params.id)
+    res.redirect('/contas-mensais')
+})
+
+//Incluir Contas Mensais
+app.get('/contas-mensais', async(req, res) => {
+    const contas = await find(app.db, 'contas')
+    res.render('contas-mensais', { contas })
+
+})
+
+
+app.get('/incluir-contas', (req, res) => res.render('incluir-contas'))
+app.post('/incluir-contas', async(req, res) => {
+    const conta = {
+        descricao: req.query.descricao,
+        valorEstimado: parseFloat(req.query.valorEstimado),
+        diaVencimento: parseInt(req.query.diaVencimento)
+    }
+    const newConta = await insert(app.db, 'contas', conta)
+    res.redirect('/contas-mensais')
 })
 
 MongoClient.connect(mongoUri, (err, db) => {
